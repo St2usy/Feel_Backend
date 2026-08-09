@@ -1,7 +1,9 @@
 package com.feel.backend.controller;
 
+import com.feel.backend.dto.ErrorResponse;
 import com.feel.backend.dto.NoticeRequestDto;
 import com.feel.backend.dto.NoticeResponseDto;
+import com.feel.backend.service.AuthService;
 import com.feel.backend.service.NoticeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,20 +21,37 @@ import java.util.List;
 public class NoticeController {
 
     private final NoticeService noticeService;
+    private final AuthService authService;
 
     // 공지사항 생성 (파일 업로드 지원)
     @PostMapping
-    public ResponseEntity<NoticeResponseDto> createNotice(
+    public ResponseEntity<?> createNotice(
+        @RequestHeader(value = "Authorization", required = false) String authHeader,
         @Valid @ModelAttribute NoticeRequestDto requestDto,
         @RequestParam(required = false) MultipartFile image
     ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         NoticeResponseDto response = noticeService.createNotice(requestDto, image);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     // 여러 공지사항 일괄 생성
     @PostMapping("/batch")
-    public ResponseEntity<List<NoticeResponseDto>> createNotices(@Valid @RequestBody List<NoticeRequestDto> requestDtos) {
+    public ResponseEntity<?> createNotices(
+        @RequestHeader(value = "Authorization", required = false) String authHeader,
+        @Valid @RequestBody List<NoticeRequestDto> requestDtos
+    ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         List<NoticeResponseDto> responses = noticeService.createNotices(requestDtos);
         return ResponseEntity.status(HttpStatus.CREATED).body(responses);
     }
@@ -64,18 +83,34 @@ public class NoticeController {
 
     // 공지사항 수정 (파일 업로드 지원)
     @PutMapping("/{id}")
-    public ResponseEntity<NoticeResponseDto> updateNotice(
+    public ResponseEntity<?> updateNotice(
+        @RequestHeader(value = "Authorization", required = false) String authHeader,
         @PathVariable Long id,
         @Valid @ModelAttribute NoticeRequestDto requestDto,
         @RequestParam(required = false) MultipartFile image
     ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         NoticeResponseDto response = noticeService.updateNotice(id, requestDto, image);
         return ResponseEntity.ok(response);
     }
 
     // 공지사항 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteNotice(@PathVariable Long id) {
+    public ResponseEntity<?> deleteNotice(
+        @RequestHeader(value = "Authorization", required = false) String authHeader,
+        @PathVariable Long id
+    ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         noticeService.deleteNotice(id);
         return ResponseEntity.noContent().build();
     }

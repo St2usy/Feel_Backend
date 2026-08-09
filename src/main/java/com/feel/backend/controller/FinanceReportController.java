@@ -1,6 +1,8 @@
 package com.feel.backend.controller;
 
+import com.feel.backend.dto.ErrorResponse;
 import com.feel.backend.dto.FinanceReportDto;
+import com.feel.backend.service.AuthService;
 import com.feel.backend.service.FinanceReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ import java.nio.file.Paths;
 public class FinanceReportController {
 
     private final FinanceReportService financeReportService;
+    private final AuthService authService;
 
     /**
      * 회계 보고서 목록 조회
@@ -59,9 +62,16 @@ public class FinanceReportController {
      * POST /api/finance/reports
      */
     @PostMapping
-    public ResponseEntity<FinanceReportDto.Response> createReport(
+    public ResponseEntity<?> createReport(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @Valid @RequestBody FinanceReportDto.Request request
     ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         FinanceReportDto.Response response = financeReportService.createReport(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -71,10 +81,17 @@ public class FinanceReportController {
      * PUT /api/finance/reports/{id}
      */
     @PutMapping("/{id}")
-    public ResponseEntity<FinanceReportDto.Response> updateReport(
+    public ResponseEntity<?> updateReport(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable Long id,
             @Valid @RequestBody FinanceReportDto.Request request
     ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         FinanceReportDto.Response response = financeReportService.updateReport(id, request);
         return ResponseEntity.ok(response);
     }
@@ -84,7 +101,16 @@ public class FinanceReportController {
      * DELETE /api/finance/reports/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReport(@PathVariable Long id) {
+    public ResponseEntity<?> deleteReport(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable Long id
+    ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         financeReportService.deleteReport(id);
         return ResponseEntity.noContent().build();
     }
@@ -94,9 +120,16 @@ public class FinanceReportController {
      * POST /api/finance/reports/upload
      */
     @PostMapping("/upload")
-    public ResponseEntity<FinanceReportDto.UploadResponse> uploadPdf(
+    public ResponseEntity<?> uploadPdf(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @RequestParam MultipartFile file
     ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         FinanceReportDto.UploadResponse response = financeReportService.uploadPdf(file);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }

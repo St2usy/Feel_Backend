@@ -73,7 +73,7 @@ public class GalleryService {
     @Transactional
     public GalleryResponseDto getGalleryById(Long id) {
         Gallery gallery = galleryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("갤러리를 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new RuntimeException("요청한 갤러리를 찾을 수 없습니다."));
 
         gallery.incrementViewCount();
         return GalleryResponseDto.fromEntity(gallery);
@@ -83,7 +83,7 @@ public class GalleryService {
     @Transactional
     public GalleryResponseDto updateGallery(Long id, GalleryRequestDto requestDto, MultipartFile imageFile) {
         Gallery gallery = galleryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("갤러리를 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new RuntimeException("요청한 갤러리를 찾을 수 없습니다."));
 
         // 기본 필드 업데이트
         gallery.setTitle(requestDto.getTitle());
@@ -111,7 +111,7 @@ public class GalleryService {
     @Transactional
     public void deleteGallery(Long id) {
         Gallery gallery = galleryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("갤러리를 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new RuntimeException("요청한 갤러리를 찾을 수 없습니다."));
 
         // 이미지 파일 삭제
         if (gallery.getImageUrl() != null) {

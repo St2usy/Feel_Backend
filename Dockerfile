@@ -11,18 +11,18 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # 2. 실행 스테이지
-# 배포용
-FROM eclipse-temurin:17-jre-alpine (인텔칩 전용)
+# 배포용 (인텔칩 전용)
+# FROM eclipse-temurin:17-jre-alpine
 
 # 로컬 개발용(Windows && Mac)
-#FROM eclipse-temurin:17-jre 
+FROM eclipse-temurin:17-jre 
 WORKDIR /app
 
-# 시스템에 필요한 도구 설치 (curl: 헬스체크용)
-RUN apk add --no-cache curl (배포용)
+# 시스템에 필요한 도구 설치 (curl: 헬스체크용) (배포용)
+# RUN apk add --no-cache curl 
 
 # 로컬 개발용(Mac)
-# RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl
 
 # 파일 업로드 디렉토리 준비
 RUN mkdir -p /app/uploads && chmod 755 /app/uploads

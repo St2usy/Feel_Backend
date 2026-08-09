@@ -64,7 +64,7 @@ public class FinanceReportService {
      */
     public FinanceReportDto.Response getReportById(Long id) {
         FinanceReport report = financeReportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("회계 보고서를 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new RuntimeException("요청한 회계 보고서를 찾을 수 없습니다."));
         return toResponse(report);
     }
 
@@ -93,7 +93,7 @@ public class FinanceReportService {
     @Transactional
     public FinanceReportDto.Response updateReport(Long id, FinanceReportDto.Request request) {
         FinanceReport report = financeReportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("회계 보고서를 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new RuntimeException("요청한 회계 보고서를 찾을 수 없습니다."));
 
         report.setTitle(request.getTitle());
         report.setDescription(request.getDescription());
@@ -112,7 +112,7 @@ public class FinanceReportService {
     @Transactional
     public void deleteReport(Long id) {
         FinanceReport report = financeReportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("회계 보고서를 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new RuntimeException("요청한 회계 보고서를 찾을 수 없습니다."));
         financeReportRepository.delete(report);
     }
 

@@ -13,6 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -53,6 +55,7 @@ public class ResourceFileService {
             String description,
             Integer year,
             Integer month,
+            LocalDate eventDate,
             MultipartFile file
     ) {
         // 카테고리 유효성 검사
@@ -89,7 +92,8 @@ public class ResourceFileService {
 
         String fileUrl = baseUrl + "/uploads/resources/" + category + "/" + storedFileName;
 
-        // DB 저장
+        // DB 저장 (행사일 입력 시 created_at에 반영, 없으면 업로드 시각)
+        LocalDateTime createdAt = eventDate != null ? eventDate.atStartOfDay() : LocalDateTime.now();
         ResourceFile resourceFile = ResourceFile.builder()
                 .category(category)
                 .originalFileName(originalFileName)
@@ -101,13 +105,26 @@ public class ResourceFileService {
                 .description(description)
                 .year(year)
                 .month(month)
+                .createdAt(createdAt)
                 .build();
 
         ResourceFile saved = resourceFileRepository.save(resourceFile);
         return toResponse(saved);
     }
 
-    // 이전 버전 호환 (year, month 없이 호출 시)
+    // 이전 버전 호환 (year, month, eventDate 없이 호출 시)
+    @Transactional
+    public ResourceFileDto.Response uploadFile(
+            String category,
+            String title,
+            String description,
+            Integer year,
+            Integer month,
+            MultipartFile file
+    ) {
+        return uploadFile(category, title, description, year, month, null, file);
+    }
+
     @Transactional
     public ResourceFileDto.Response uploadFile(
             String category,
@@ -115,7 +132,23 @@ public class ResourceFileService {
             String description,
             MultipartFile file
     ) {
-        return uploadFile(category, title, description, null, null, file);
+        return uploadFile(category, title, description, null, null, null, file);
+    }
+
+    @Transactional
+    public ResourceFileDto.Response updateFileMeta(Long id, ResourceFileDto.UpdateRequest request) {
+        ResourceFile file = resourceFileRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("요청한 파일을 찾을 수 없습니다."));
+        if (request.getTitle() != null) {
+            file.setTitle(request.getTitle());
+        }
+        if (request.getDescription() != null) {
+            file.setDescription(request.getDescription());
+        }
+        if (request.getEventDate() != null) {
+            file.setCreatedAt(request.getEventDate().atStartOfDay());
+        }
+        return toResponse(resourceFileRepository.save(file));
     }
 
     public Page<ResourceFileDto.Response> getFilesByCategory(String category, int page, int size) {
@@ -139,14 +172,14 @@ public class ResourceFileService {
 
     public ResourceFileDto.Response getFileById(Long id) {
         ResourceFile file = resourceFileRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("파일을 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new RuntimeException("요청한 파일을 찾을 수 없습니다."));
         return toResponse(file);
     }
 
     @Transactional
     public void deleteFile(Long id) {
         ResourceFile file = resourceFileRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("파일을 찾을 수 없습니다. ID: " + id));
+                .orElseThrow(() -> new RuntimeException("요청한 파일을 찾을 수 없습니다."));
 
         // 실제 파일 삭제
         Path filePath = Paths.get(uploadDir, "resources", file.getCategory(), file.getStoredFileName());

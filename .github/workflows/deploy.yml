@@ -18,13 +18,22 @@ jobs:
           port: ${{ secrets.JCLOUD_SSH_PORT }}
           script: |
             set -e
-              cd /home/ubuntu/admin
+              cd /home/ubuntu/Feel_Backend
+
+              echo "=== 현재 브랜치 및 origin ==="
+              git branch -a
+              git remote -v
+
+              echo "=== main 최신화 ==="
               git fetch origin main
               git reset --hard origin/main
-              
+              git pull origin main
+
               if docker compose build --no-cache backend; then
                 docker compose up -d --force-recreate backend
                 docker image prune -f
+                echo "=== 배포 완료 ==="
             else
+                echo "ERR: docker compose build failed"
                 exit 1
             fi

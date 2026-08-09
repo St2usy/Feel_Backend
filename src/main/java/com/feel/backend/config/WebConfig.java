@@ -16,40 +16,60 @@ public class WebConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
             .allowedOrigins(
+                "http://engsc.jbnu.ac.kr",
+                "https://engsc.jbnu.ac.kr",
+                "http://engsc-admin.jbnu.ac.kr",
+                "https://engsc-admin.jbnu.ac.kr",
+                "http://local-engsc.jbnu.ac.kr",
+                "https://local-engsc.jbnu.ac.kr",
                 "http://feel-test.com",
                 "https://feel-test.com",
                 "http://admin.feel-test.com",
                 "https://admin.feel-test.com",
+                "http://localhost",
                 "http://localhost:3000",
                 "https://localhost:3000",
                 "http://localhost:3001",
                 "http://localhost:5173",
+                "http://admin.localhost",
                 "http://feel-test.113.198.66.98.nip.io",
+                "https://feel-test.113.198.66.98.nip.io",
                 "http://admin.feel-test.113.198.66.98.nip.io",
+                "https://admin.feel-test.113.198.66.98.nip.io",
                 "http://api.feel-test.113.198.66.98.nip.io"
             )
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
-            .allowedHeaders("*")
+            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+            .allowedHeaders("Content-Type", "Authorization")
             .allowCredentials(true)
             .maxAge(3600);
 
         // 업로드된 이미지 파일 접근을 위한 CORS 설정
         registry.addMapping("/uploads/**")
             .allowedOrigins(
+                "http://engsc.jbnu.ac.kr",
+                "https://engsc.jbnu.ac.kr",
+                "http://engsc-admin.jbnu.ac.kr",
+                "https://engsc-admin.jbnu.ac.kr",
+                "http://local-engsc.jbnu.ac.kr",
+                "https://local-engsc.jbnu.ac.kr",
                 "http://feel-test.com",
                 "https://feel-test.com",
                 "http://admin.feel-test.com",
                 "https://admin.feel-test.com",
+                "http://localhost",
                 "http://localhost:3000",
                 "https://localhost:3000",
                 "http://localhost:3001",
                 "http://localhost:5173",
+                "http://admin.localhost",
                 "http://feel-test.113.198.66.98.nip.io",
+                "https://feel-test.113.198.66.98.nip.io",
                 "http://admin.feel-test.113.198.66.98.nip.io",
+                "https://admin.feel-test.113.198.66.98.nip.io",
                 "http://api.feel-test.113.198.66.98.nip.io"
             )
             .allowedMethods("GET", "OPTIONS")
-            .allowedHeaders("*")
+            .allowedHeaders("Content-Type", "Authorization")
             .allowCredentials(true)
             .maxAge(3600);
     }
