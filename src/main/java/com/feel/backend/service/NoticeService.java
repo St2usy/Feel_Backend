@@ -96,7 +96,7 @@ public class NoticeService {
     @Transactional
     public NoticeResponseDto getNoticeById(Long id) {
         Notice notice = noticeRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("공지사항을 찾을 수 없습니다. ID: " + id));
+            .orElseThrow(() -> new RuntimeException("요청한 공지사항을 찾을 수 없습니다."));
 
         notice.incrementViewCount();
         return NoticeResponseDto.fromEntity(notice);
@@ -106,7 +106,7 @@ public class NoticeService {
     @Transactional
     public NoticeResponseDto updateNotice(Long id, NoticeRequestDto requestDto, MultipartFile imageFile) {
         Notice notice = noticeRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("공지사항을 찾을 수 없습니다. ID: " + id));
+            .orElseThrow(() -> new RuntimeException("요청한 공지사항을 찾을 수 없습니다."));
 
         // 기본 필드 업데이트
         notice.setTitle(requestDto.getTitle());
@@ -135,7 +135,7 @@ public class NoticeService {
     @Transactional
     public void deleteNotice(Long id) {
         Notice notice = noticeRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("공지사항을 찾을 수 없습니다. ID: " + id));
+            .orElseThrow(() -> new RuntimeException("요청한 공지사항을 찾을 수 없습니다."));
 
         // 이미지 파일 삭제
         if (notice.getImageUrl() != null) {

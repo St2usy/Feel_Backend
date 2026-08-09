@@ -1,7 +1,9 @@
 package com.feel.backend.controller;
 
+import com.feel.backend.dto.ErrorResponse;
 import com.feel.backend.dto.GalleryRequestDto;
 import com.feel.backend.dto.GalleryResponseDto;
+import com.feel.backend.service.AuthService;
 import com.feel.backend.service.GalleryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -20,13 +22,21 @@ import java.util.List;
 public class GalleryController {
 
     private final GalleryService galleryService;
+    private final AuthService authService;
 
     // 갤러리 생성 (파일 업로드 필수)
     @PostMapping
-    public ResponseEntity<GalleryResponseDto> createGallery(
+    public ResponseEntity<?> createGallery(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @Valid @ModelAttribute GalleryRequestDto requestDto,
             @RequestParam MultipartFile image
     ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         GalleryResponseDto response = galleryService.createGallery(requestDto, image);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -58,18 +68,34 @@ public class GalleryController {
 
     // 갤러리 수정 (파일 업로드 선택)
     @PutMapping("/{id}")
-    public ResponseEntity<GalleryResponseDto> updateGallery(
+    public ResponseEntity<?> updateGallery(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             @PathVariable Long id,
             @Valid @ModelAttribute GalleryRequestDto requestDto,
             @RequestParam(required = false) MultipartFile image
     ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         GalleryResponseDto response = galleryService.updateGallery(id, requestDto, image);
         return ResponseEntity.ok(response);
     }
 
     // 갤러리 삭제
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteGallery(@PathVariable Long id) {
+    public ResponseEntity<?> deleteGallery(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            @PathVariable Long id
+    ) {
+        try {
+            authService.validateAuthHeader(authHeader);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(ErrorResponse.builder().message(e.getMessage()).build());
+        }
         galleryService.deleteGallery(id);
         return ResponseEntity.noContent().build();
     }

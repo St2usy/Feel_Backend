@@ -60,3 +60,7 @@ ssh-key-*
 
 ### TEST Data SET ###
 test_json/
+
+
+### Docker  ###
+Dockerfile

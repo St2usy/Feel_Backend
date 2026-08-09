@@ -2,6 +2,7 @@ package com.feel.backend.dto;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -18,6 +19,7 @@ public class ResourceFileDto {
         private String description;
         private Integer year;
         private Integer month;
+        private LocalDate eventDate;
     }
 
     @Getter
@@ -57,5 +59,17 @@ public class ResourceFileDto {
             private Integer year;
             private List<Integer> months;
         }
+    }
+
+    /** 리소스 메타 수정용 (제목, 설명, 행사일) */
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class UpdateRequest {
+        private String title;
+        private String description;
+        private LocalDate eventDate;
     }
 }

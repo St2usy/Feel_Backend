@@ -72,7 +72,37 @@ public class FileStorageService {
     }
 
     /**
-     * 파일을 삭제합니다.
+     * 지정한 하위 디렉토리에 파일을 저장하고, 접근 URL 경로를 반환합니다.
+     * 예: subDir="activities" -> "activities/uuid.jpg" 반환, DB에는 "/uploads/activities/uuid.jpg" 저장
+     */
+    public String storeFileInSubdir(MultipartFile file, String subDir) {
+        if (file == null || file.isEmpty()) {
+            return null;
+        }
+        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+        try {
+            if (originalFileName.contains("..")) {
+                throw new RuntimeException("파일명에 부적절한 경로가 포함되어 있습니다: " + originalFileName);
+            }
+            String fileExtension = "";
+            int lastDotIndex = originalFileName.lastIndexOf('.');
+            if (lastDotIndex > 0) {
+                fileExtension = originalFileName.substring(lastDotIndex);
+            }
+            String newFileName = UUID.randomUUID().toString() + fileExtension;
+            Path subDirPath = this.fileStorageLocation.resolve(subDir);
+            Files.createDirectories(subDirPath);
+            Path targetLocation = subDirPath.resolve(newFileName);
+            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            log.info("파일 저장 완료: {} -> {}/{}", originalFileName, subDir, newFileName);
+            return subDir + "/" + newFileName;
+        } catch (IOException ex) {
+            throw new RuntimeException("파일 저장에 실패했습니다: " + originalFileName, ex);
+        }
+    }
+
+    /**
+     * 파일을 삭제합니다. (하위 디렉 포함 경로 지원, 예: "activities/uuid.jpg")
      */
     public void deleteFile(String fileName) {
         if (fileName == null || fileName.isEmpty()) {
@@ -89,19 +119,18 @@ public class FileStorageService {
     }
 
     /**
-     * 이미지 URL에서 파일명만 추출합니다.
+     * 이미지 URL에서 저장 경로 상대 경로를 추출합니다.
+     * 예: "/uploads/activities/uuid.jpg" -> "activities/uuid.jpg"
+     *     "/uploads/abc.jpg" -> "abc.jpg"
      */
     public String extractFileName(String imageUrl) {
         if (imageUrl == null || imageUrl.isEmpty()) {
             return null;
         }
-
-        // URL에서 마지막 슬래시 이후의 파일명만 추출
-        int lastSlashIndex = imageUrl.lastIndexOf('/');
-        if (lastSlashIndex > 0 && lastSlashIndex < imageUrl.length() - 1) {
-            return imageUrl.substring(lastSlashIndex + 1);
+        String path = imageUrl;
+        if (path.startsWith("/uploads/")) {
+            path = path.substring("/uploads/".length());
         }
-
-        return imageUrl;
+        return path.isEmpty() ? null : path;
     }
 }
